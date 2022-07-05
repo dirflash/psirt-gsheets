@@ -1,3 +1,4 @@
+import gspread
 import os
 import configparser
 import logging
@@ -8,15 +9,35 @@ from datetime import datetime, date, timedelta
 from time import time
 import requests
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(r".\logs\debug.log"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+
 KEY = "CI"
-if os.getenv(KEY):
-    pass
+environ = os.getenv(KEY, default="LOCAL")
+
+if environ == "CI":
+    psirt_grant = "client_credentials"
+    psirt_client_id = os.environ["psirt_client_id"]
+    psirt_client_secret = os.environ["psirt_client_secret"]
 else:
     config = configparser.ConfigParser()
     config.read("config.ini")
     psirt_grant = config["PSIRT"]["grant_type"]
     psirt_client_id = config["PSIRT"]["client_id"]
     psirt_client_secret = config["PSIRT"]["client_secret"]
+
+sa = (
+    gspread.service_account()
+)  # if json file move to another location, put that in the ()
+sh = sa.open("PSIRTs")
+
+wks = sh.worksheet("Last7")
 
 
 def recent_update(verify_cve_date):
@@ -90,6 +111,8 @@ otoken_token, otoken_type, otoken_expiry = psirt_otoken(
     psirt_grant, psirt_client_id, psirt_client_secret
 )
 
+logging.info("------------------------------------------------------")
+
 # Begin of PSIRT request
 
 TODAY = date.today()
@@ -143,51 +166,82 @@ header_names = [
     "Pub_URL",
 ]
 
-with open(
-    r".\reports\Cisco_PSIRT_" + TODAY_STR + ".csv",
-    "w",
-    newline="",
-    encoding="UTF-8",
-) as csvfile:
-    csvwriter = csv.writer(csvfile, delimiter=";")
-    csvwriter.writerow(header_names)
+# This piece is not working
+if environ == "LOCAL":  # os.getenv(KEY, default) == type("NoneType"):
+    with open(
+        r".\reports\Cisco_PSIRT_" + TODAY_STR + ".csv",
+        "w",
+        newline="",
+        encoding="UTF-8",
+    ) as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=";")
+        csvwriter.writerow(header_names)
 
-    for entry in cve_entries:
-        last_updated = entry["lastUpdated"]
-        fresh_update = recent_update(last_updated)
-        if fresh_update is True:
-            UPDATED_ENTRIES += 1
-            advisory_id = entry["advisoryId"]
-            advisory_title = entry["advisoryTitle"]
-            cve_score = entry["cvssBaseScore"]
-            criticality = entry["sir"]
-            psirt_version = entry["version"]
-            first_published = entry["firstPublished"]
-            cve_status = entry["status"]
-            product_names = entry["productNames"]
-            pub_url = entry["publicationUrl"]
-            row = [
-                advisory_id,
-                advisory_title,
-                cve_score,
-                criticality,
-                psirt_version,
-                first_published,
-                last_updated,
-                cve_status,
-                product_names,
-                pub_url,
-            ]
-            csvwriter.writerow(row)
+        for entry in cve_entries:
+            last_updated = entry["lastUpdated"]
+            fresh_update = recent_update(last_updated)
+            if fresh_update is True:
+                UPDATED_ENTRIES += 1
+                advisory_id = entry["advisoryId"]
+                advisory_title = entry["advisoryTitle"]
+                cve_score = entry["cvssBaseScore"]
+                criticality = entry["sir"]
+                psirt_version = entry["version"]
+                first_published = entry["firstPublished"]
+                cve_status = entry["status"]
+                product_names = entry["productNames"]
+                pub_url = entry["publicationUrl"]
+                row = [
+                    advisory_id,
+                    advisory_title,
+                    cve_score,
+                    criticality,
+                    psirt_version,
+                    first_published,
+                    last_updated,
+                    cve_status,
+                    product_names,
+                    pub_url,
+                ]
+                csvwriter.writerow(row)
 
-        ENTRY_COUNT += 1
+            ENTRY_COUNT += 1
 
-logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
-logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
+    logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
+    logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
 
 # End of conversion
 
-MSG_BOD_1 = f"  * Number of CVE entries in the last 90-days: {ENTRY_COUNT}\n"
-MSG_BOD_2 = f"* Number of CVE entries updated in last 7-days: {UPDATED_ENTRIES}"
+# Update Google Sheet
+wks.clear()
 
-REPLY_MSG_BODY = MSG_BOD_1 + MSG_BOD_2
+wks.update("A1:J1", [header_names])
+
+for entry in cve_entries:
+    last_updated = entry["lastUpdated"]
+    fresh_update = recent_update(last_updated)
+    if fresh_update is True:
+        UPDATED_ENTRIES += 1
+        advisory_id = entry["advisoryId"]
+        advisory_title = entry["advisoryTitle"]
+        cve_score = entry["cvssBaseScore"]
+        criticality = entry["sir"]
+        psirt_version = entry["version"]
+        first_published = entry["firstPublished"]
+        cve_status = entry["status"]
+        product_names = f'{entry["productNames"]}'
+        pub_url = entry["publicationUrl"]
+        row = [
+            advisory_id,
+            advisory_title,
+            cve_score,
+            criticality,
+            psirt_version,
+            first_published,
+            last_updated,
+            cve_status,
+            product_names,
+            pub_url,
+        ]
+        gsheet_row = f"A{UPDATED_ENTRIES}:J{UPDATED_ENTRIES}"
+        wks.update(gsheet_row, [row])
