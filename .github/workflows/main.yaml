@@ -28,7 +28,7 @@ jobs:
           pip install -r requirements.txt
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: service_account.json
-        id: service_account.json
+        id: service_account
         uses: actions/create-json@1.1.2
         with:
           name: "service_account.json"
