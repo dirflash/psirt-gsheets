@@ -205,11 +205,16 @@ if environ == "LOCAL":
                 csvwriter.writerow(row)
 
             ENTRY_COUNT += 1
+else:
+    for _ in cve_entries:
+        last_updated = _["lastUpdated"]
+        fresh_update = recent_update(last_updated)
+        if fresh_update is True:
+            UPDATED_ENTRIES += 1
+        ENTRY_COUNT += 1
 
-    logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
-    print(f"Total number of CVE entries: {ENTRY_COUNT}")
-    logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
-    print(f"Total number of CVE entries: {UPDATED_ENTRIES}")
+logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
+logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
 
 # End of conversion
 
