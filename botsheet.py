@@ -247,3 +247,6 @@ for entry in cve_entries:
 
 logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
 logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
+
+if UPDATED_ENTRIES == 0:
+    wks.update("A2", "No updated CVEs in last 7-days")
