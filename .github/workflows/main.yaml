@@ -2,8 +2,8 @@ name: pipedream-dispatch
 
 # Controls when the action will run. Triggers the workflow on push request, or repository dispatch
 on:
-  schedule:
-    - cron: '0 7/4 * * *'
+  # schedule:
+    # - cron: '0 7/4 * * *'
   repository_dispatch:
     types: [BOT_SHEET_RUN]
 
