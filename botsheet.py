@@ -1,12 +1,12 @@
-import gspread
 import os
 import configparser
 import logging
 import sys
 import json
 import csv
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from time import time
+import gspread
 import requests
 
 logging.basicConfig(
