@@ -22,7 +22,7 @@ KEY = "CI"
 environ = os.getenv(KEY, default="LOCAL")
 print(environ)
 
-if environ == "CI":
+if environ is True:
     psirt_grant = "client_credentials"
     psirt_client_id = os.environ["psirt_client_id"]
     psirt_client_secret = os.environ["psirt_client_secret"]
