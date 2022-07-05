@@ -25,7 +25,6 @@ if environ == "true":
     psirt_grant = "client_credentials"
     psirt_client_id = os.environ["psirt_client_id"]
     psirt_client_secret = os.environ["psirt_client_secret"]
-    # gsheets_auth = os.environ["gsheets_auth"]
     sa = gspread.service_account("service_account.json")
 else:
     config = configparser.ConfigParser()
@@ -205,16 +204,9 @@ if environ == "LOCAL":
                 csvwriter.writerow(row)
 
             ENTRY_COUNT += 1
-else:
-    for _ in cve_entries:
-        last_updated = _["lastUpdated"]
-        fresh_update = recent_update(last_updated)
-        if fresh_update is True:
-            UPDATED_ENTRIES += 1
-        ENTRY_COUNT += 1
 
-logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
-logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
+    logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
+    logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
 
 # End of conversion
 
