@@ -251,3 +251,6 @@ for entry in cve_entries:
         ]
         gsheet_row = f"A{UPDATED_ENTRIES}:J{UPDATED_ENTRIES}"
         wks.update(gsheet_row, [row])
+
+logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
+logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
