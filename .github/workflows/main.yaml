@@ -12,7 +12,7 @@ jobs:
     name: Run botsheet.py
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    environment: psirt_bot_enviro_1
+    environment: psirt_gsheets
     steps:
       - name: checkout repo content
         uses: actions/checkout@v2
