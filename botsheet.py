@@ -243,10 +243,10 @@ for entry in cve_entries:
         ]
         gsheet_row = f"A{UPDATED_ENTRIES}:J{UPDATED_ENTRIES}"
         wks.update(gsheet_row, [row])
-        ENTRY_COUNT += 1
+    ENTRY_COUNT += 1
 
 logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
 logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
 
-if UPDATED_ENTRIES == 0:
+if UPDATED_ENTRIES == "0":
     wks.update("A2", "No updated CVEs in last 7-days")
