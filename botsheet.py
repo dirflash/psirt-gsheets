@@ -20,6 +20,7 @@ logging.basicConfig(
 
 KEY = "CI"
 environ = os.getenv(KEY, default="LOCAL")
+print(environ)
 
 if environ == "CI":
     psirt_grant = "client_credentials"
