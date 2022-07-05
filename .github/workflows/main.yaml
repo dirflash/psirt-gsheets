@@ -27,6 +27,12 @@ jobs:
           pip install --upgrade gspread
           pip install -r requirements.txt
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: service_account.json
+        id: service_account.json
+        uses: actions/create-json@1.1.2
+        with:
+          name: "service_account.json"
+          gsheets_auth: ${{ secrets.GSHEETS_SECRET}}
       - name: execute py script # run file
         env:
           psirt_client_id: ${{ secrets.PSIRT_CLIENT_ID }}
