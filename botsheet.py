@@ -20,7 +20,6 @@ logging.basicConfig(
 
 KEY = "CI"
 environ = os.getenv(KEY, default="LOCAL")
-print(environ)
 
 if environ == "true":
     psirt_grant = "client_credentials"
@@ -36,11 +35,6 @@ else:
     psirt_client_secret = config["PSIRT"]["client_secret"]
     sa = gspread.service_account()
 
-"""
-sa = gspread.service_account(
-    "src/service_account.json"
-)  # if json file move to another location, put that in the ()
-"""
 sh = sa.open("PSIRTs")
 
 wks = sh.worksheet("Last7")
@@ -172,8 +166,7 @@ header_names = [
     "Pub_URL",
 ]
 
-# This piece is not working
-if environ == "LOCAL":  # os.getenv(KEY, default) == type("NoneType"):
+if environ == "LOCAL":
     with open(
         r".\reports\Cisco_PSIRT_" + TODAY_STR + ".csv",
         "w",
@@ -214,7 +207,9 @@ if environ == "LOCAL":  # os.getenv(KEY, default) == type("NoneType"):
             ENTRY_COUNT += 1
 
     logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
+    print(f"Total number of CVE entries: {ENTRY_COUNT}")
     logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
+    print(f"Total number of CVE entries: {UPDATED_ENTRIES}")
 
 # End of conversion
 
