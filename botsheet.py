@@ -26,6 +26,7 @@ if environ == "true":
     psirt_grant = "client_credentials"
     psirt_client_id = os.environ["psirt_client_id"]
     psirt_client_secret = os.environ["psirt_client_secret"]
+    gsheets_auth = os.environ["gsheets_auth"]
 else:
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -33,8 +34,8 @@ else:
     psirt_client_id = config["PSIRT"]["client_id"]
     psirt_client_secret = config["PSIRT"]["client_secret"]
 
-sa = (
-    gspread.service_account()
+sa = gspread.service_account(
+    gsheets_auth
 )  # if json file move to another location, put that in the ()
 sh = sa.open("PSIRTs")
 
