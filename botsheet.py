@@ -27,7 +27,7 @@ if environ == "true":
     psirt_client_id = os.environ["psirt_client_id"]
     psirt_client_secret = os.environ["psirt_client_secret"]
     # gsheets_auth = os.environ["gsheets_auth"]
-    sa = gspread.service_account("src/service_account.json")
+    sa = gspread.service_account("service_account.json")
 else:
     config = configparser.ConfigParser()
     config.read("config.ini")

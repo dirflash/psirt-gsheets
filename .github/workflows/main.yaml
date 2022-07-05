@@ -33,7 +33,7 @@ jobs:
         with:
           name: "service_account.json"
           json: ${{ secrets.GSHEETS_SECRET}}
-          dir: 'src/'
+          # dir: 'src/'
       - name: execute py script # run file
         env:
           psirt_client_id: ${{ secrets.PSIRT_CLIENT_ID }}
