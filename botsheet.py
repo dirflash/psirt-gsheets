@@ -150,7 +150,9 @@ psirt_json_response = json.loads(psirt_response.text)
 cve_entries = psirt_json_response["advisories"]
 
 ENTRY_COUNT = 1
-UPDATED_ENTRIES = 0
+UPDATED_ENTRIES = 1
+G_ENTRY_COUNT = 1
+G_UPDATED_ENTRIES = 1
 
 header_names = [
     "Advisory_ID",
@@ -219,7 +221,7 @@ for entry in cve_entries:
     last_updated = entry["lastUpdated"]
     fresh_update = recent_update(last_updated)
     if fresh_update is True:
-        UPDATED_ENTRIES += 1
+        G_UPDATED_ENTRIES += 1
         advisory_id = entry["advisoryId"]
         advisory_title = entry["advisoryTitle"]
         cve_score = entry["cvssBaseScore"]
@@ -241,12 +243,12 @@ for entry in cve_entries:
             product_names,
             pub_url,
         ]
-        gsheet_row = f"A{UPDATED_ENTRIES}:J{UPDATED_ENTRIES}"
+        gsheet_row = f"A{G_UPDATED_ENTRIES}:J{G_UPDATED_ENTRIES}"
         wks.update(gsheet_row, [row])
-    ENTRY_COUNT += 1
+    G_ENTRY_COUNT += 1
 
-logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
-logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
+logging.info("Total number of CVE entries: %s", G_ENTRY_COUNT)
+logging.info("Number of updated CVE entries: %s", G_UPDATED_ENTRIES)
 
-if UPDATED_ENTRIES == 0:
+if G_UPDATED_ENTRIES == 0:
     wks.update("A2", "No updated CVEs in last 7-days")
