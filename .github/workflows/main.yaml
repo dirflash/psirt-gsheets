@@ -34,6 +34,9 @@ jobs:
           name: "service_account.json"
           json: ${{ secrets.GSHEETS_SECRET}}
           # dir: 'src/'
+      - name: Sleep for 2 seconds
+        run: sleep 2s
+        shell: bash
       - name: execute py script # run file
         env:
           psirt_client_id: ${{ secrets.PSIRT_CLIENT_ID }}
