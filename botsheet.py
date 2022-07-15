@@ -35,11 +35,16 @@ else:
     sa = gspread.service_account()
 
 sh = sa.open("PSIRTs")
-
 wks = sh.worksheet("Last7")
 
+sh_14 = sa.open("PSIRT-14")
+wks_14 = sh_14.worksheet("Last14")
 
-def recent_update(verify_cve_date):
+sh_30 = sa.open("PSIRT-30")
+wks_30 = sh_30.worksheet("Last30")
+
+
+def recent_update_7(verify_cve_date):
     """Determines if CVE entry has been updated in last 7 days
 
     Args:
@@ -54,6 +59,42 @@ def recent_update(verify_cve_date):
     new_date = date(int(split_date[0]), int(split_date[1]), int(split_date[2]))
     seven_days = date.today() - timedelta(days=7)
     recent = seven_days < new_date
+    return recent
+
+
+def recent_update_14(verify_cve_date):
+    """Determines if CVE entry has been updated in last 14 days
+
+    Args:
+        verify_cve_date (string): yyyy-mm-ddThh:mm:ss
+
+    Returns:
+        bool: True if entry has been updated in last 14 days
+    """
+    t_index = verify_cve_date.index("T")
+    stripped_date = verify_cve_date[:t_index:]
+    split_date = tuple(stripped_date.split("-"))
+    new_date = date(int(split_date[0]), int(split_date[1]), int(split_date[2]))
+    fourteen_days = date.today() - timedelta(days=14)
+    recent = fourteen_days < new_date
+    return recent
+
+
+def recent_update_30(verify_cve_date):
+    """Determines if CVE entry has been updated in last 30 days
+
+    Args:
+        verify_cve_date (string): yyyy-mm-ddThh:mm:ss
+
+    Returns:
+        bool: True if entry has been updated in last 30 days
+    """
+    t_index = verify_cve_date.index("T")
+    stripped_date = verify_cve_date[:t_index:]
+    split_date = tuple(stripped_date.split("-"))
+    new_date = date(int(split_date[0]), int(split_date[1]), int(split_date[2]))
+    thirty_days = date.today() - timedelta(days=30)
+    recent = thirty_days < new_date
     return recent
 
 
@@ -117,12 +158,12 @@ logging.info("------------------------------------------------------")
 TODAY = date.today()
 TODAY_STR = str(TODAY)
 DELTA = timedelta(days=90)
-NINTY_DAYS = TODAY - DELTA
-NINTY_DAYS_STR = str(NINTY_DAYS)
+NINETY_DAYS = TODAY - DELTA
+NINETY_DAYS_STR = str(NINETY_DAYS)
 
 psirt_url = (
     f"https://api.cisco.com/security/advisories/all/firstpublished"
-    f"?startDate={NINTY_DAYS_STR}&endDate={TODAY_STR}"
+    f"?startDate={NINETY_DAYS_STR}&endDate={TODAY_STR}"
 )
 
 psirt_token = f"Bearer {otoken_token}"
@@ -152,7 +193,9 @@ cve_entries = psirt_json_response["advisories"]
 ENTRY_COUNT = 1
 UPDATED_ENTRIES = 1
 G_ENTRY_COUNT = 1
-G_UPDATED_ENTRIES = 1
+G_UPDATED_ENTRIES_7 = 1
+G_UPDATED_ENTRIES_14 = 1
+G_UPDATED_ENTRIES_30 = 1
 
 header_names = [
     "Advisory_ID",
@@ -179,7 +222,7 @@ if environ == "LOCAL":
 
         for entry in cve_entries:
             last_updated = entry["lastUpdated"]
-            fresh_update = recent_update(last_updated)
+            fresh_update = recent_update_7(last_updated)
             if fresh_update is True:
                 UPDATED_ENTRIES += 1
                 advisory_id = entry["advisoryId"]
@@ -207,21 +250,21 @@ if environ == "LOCAL":
 
             ENTRY_COUNT += 1
 
-    logging.info("Total number of CVE entries: %s", ENTRY_COUNT)
-    logging.info("Number of updated CVE entries: %s", UPDATED_ENTRIES)
-
 # End of conversion
 
-# Update Google Sheet
+# Update 7-day Google Sheet
+
+logging.info("Populate 7-day Google Sheet")
+
 wks.clear()
 
 wks.update("A1:J1", [header_names])
 
 for entry in cve_entries:
     last_updated = entry["lastUpdated"]
-    fresh_update = recent_update(last_updated)
+    fresh_update = recent_update_7(last_updated)
     if fresh_update is True:
-        G_UPDATED_ENTRIES += 1
+        G_UPDATED_ENTRIES_7 += 1
         advisory_id = entry["advisoryId"]
         advisory_title = entry["advisoryTitle"]
         cve_score = entry["cvssBaseScore"]
@@ -243,12 +286,98 @@ for entry in cve_entries:
             product_names,
             pub_url,
         ]
-        gsheet_row = f"A{G_UPDATED_ENTRIES}:J{G_UPDATED_ENTRIES}"
+        gsheet_row = f"A{G_UPDATED_ENTRIES_7}:J{G_UPDATED_ENTRIES_7}"
         wks.update(gsheet_row, [row])
     G_ENTRY_COUNT += 1
 
-logging.info("Total number of CVE entries: %s", G_ENTRY_COUNT)
-logging.info("Number of updated CVE entries: %s", G_UPDATED_ENTRIES)
+# Update 14-day Google Sheet
+logging.info("Populate 14-day Google Sheet")
 
-if G_UPDATED_ENTRIES == 0:
-    wks.update("A2", "No updated CVEs in last 7-days")
+wks_14.clear()
+
+wks_14.update("A1:J1", [header_names])
+
+for entry in cve_entries:
+    last_updated = entry["lastUpdated"]
+    fresh_update = recent_update_14(last_updated)
+    if fresh_update is True:
+        G_UPDATED_ENTRIES_14 += 1
+        advisory_id = entry["advisoryId"]
+        advisory_title = entry["advisoryTitle"]
+        cve_score = entry["cvssBaseScore"]
+        criticality = entry["sir"]
+        psirt_version = entry["version"]
+        first_published = entry["firstPublished"]
+        cve_status = entry["status"]
+        product_names = f'{entry["productNames"]}'
+        pub_url = entry["publicationUrl"]
+        row = [
+            advisory_id,
+            advisory_title,
+            cve_score,
+            criticality,
+            psirt_version,
+            first_published,
+            last_updated,
+            cve_status,
+            product_names,
+            pub_url,
+        ]
+        gsheet_row = f"A{G_UPDATED_ENTRIES_14}:J{G_UPDATED_ENTRIES_14}"
+        wks_14.update(gsheet_row, [row])
+
+# Update 30-day Google Sheet
+logging.info("Populate 14-day Google Sheet")
+
+wks_30.clear()
+
+wks_30.update("A1:J1", [header_names])
+
+for entry in cve_entries:
+    last_updated = entry["lastUpdated"]
+    fresh_update = recent_update_30(last_updated)
+    if fresh_update is True:
+        G_UPDATED_ENTRIES_30 += 1
+        advisory_id = entry["advisoryId"]
+        advisory_title = entry["advisoryTitle"]
+        cve_score = entry["cvssBaseScore"]
+        criticality = entry["sir"]
+        psirt_version = entry["version"]
+        first_published = entry["firstPublished"]
+        cve_status = entry["status"]
+        product_names = f'{entry["productNames"]}'
+        pub_url = entry["publicationUrl"]
+        row = [
+            advisory_id,
+            advisory_title,
+            cve_score,
+            criticality,
+            psirt_version,
+            first_published,
+            last_updated,
+            cve_status,
+            product_names,
+            pub_url,
+        ]
+        gsheet_row = f"A{G_UPDATED_ENTRIES_30}:J{G_UPDATED_ENTRIES_30}"
+        wks_30.update(gsheet_row, [row])
+
+TTL_CNT = G_ENTRY_COUNT - 1
+SVN_CNT = G_UPDATED_ENTRIES_7 - 1
+FTN_CNT = G_UPDATED_ENTRIES_14 - 1
+TTY_CNT = G_UPDATED_ENTRIES_30 - 1
+
+logging.info("Total number of CVE entries: %s", TTL_CNT)
+logging.info("Number of updated CVE entries in last 7-days: %s", SVN_CNT)
+logging.info("Number of updated CVE entries in last 14-days: %s", FTN_CNT)
+logging.info("Number of updated CVE entries in last 30-days: %s", TTY_CNT)
+
+if G_UPDATED_ENTRIES_7 == 0:
+    wks.update("A2", "No updated CVEs in this time-frame")
+
+if G_UPDATED_ENTRIES_14 == 0:
+    wks_14.update("A2", "No updated CVEs in this time-frame")
+
+
+if G_UPDATED_ENTRIES_30 == 0:
+    wks_14.update("A2", "No updated CVEs in this time-frame")
