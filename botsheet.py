@@ -380,4 +380,4 @@ if G_UPDATED_ENTRIES_14 == 0:
 
 
 if G_UPDATED_ENTRIES_30 == 0:
-    wks_14.update("A2", "No updated CVEs in this time-frame")
+    wks_30.update("A2", "No updated CVEs in this time-frame")
