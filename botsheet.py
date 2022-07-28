@@ -372,12 +372,12 @@ logging.info("Number of updated CVE entries in last 7-days: %s", SVN_CNT)
 logging.info("Number of updated CVE entries in last 14-days: %s", FTN_CNT)
 logging.info("Number of updated CVE entries in last 30-days: %s", TTY_CNT)
 
-if G_UPDATED_ENTRIES_7 == 0:
+if SVN_CNT == 0:
     wks.update("A2", "No updated CVEs in this time-frame")
 
-if G_UPDATED_ENTRIES_14 == 0:
+if FTN_CNT == 0:
     wks_14.update("A2", "No updated CVEs in this time-frame")
 
 
-if G_UPDATED_ENTRIES_30 == 0:
+if TTY_CNT == 0:
     wks_30.update("A2", "No updated CVEs in this time-frame")
