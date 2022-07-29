@@ -200,6 +200,7 @@ G_UPDATED_ENTRIES_30 = 1
 header_names = [
     "Advisory_ID",
     "Advisory_Title",
+    "CVEs",
     "CVE_Base_Score",
     "Criticality",
     "PSIRT_Version",
@@ -258,7 +259,7 @@ logging.info("Populate 7-day Google Sheet")
 
 wks.clear()
 
-wks.update("A1:J1", [header_names])
+wks.update("A1:K1", [header_names])
 
 for entry in cve_entries:
     last_updated = entry["lastUpdated"]
@@ -267,6 +268,8 @@ for entry in cve_entries:
         G_UPDATED_ENTRIES_7 += 1
         advisory_id = entry["advisoryId"]
         advisory_title = entry["advisoryTitle"]
+        cves_lst = entry["cves"]
+        cves = ", ".join(cves_lst)
         cve_score = entry["cvssBaseScore"]
         criticality = entry["sir"]
         psirt_version = entry["version"]
@@ -277,6 +280,7 @@ for entry in cve_entries:
         row = [
             advisory_id,
             advisory_title,
+            cves,
             cve_score,
             criticality,
             psirt_version,
@@ -286,7 +290,7 @@ for entry in cve_entries:
             product_names,
             pub_url,
         ]
-        gsheet_row = f"A{G_UPDATED_ENTRIES_7}:J{G_UPDATED_ENTRIES_7}"
+        gsheet_row = f"A{G_UPDATED_ENTRIES_7}:K{G_UPDATED_ENTRIES_7}"
         wks.update(gsheet_row, [row])
     G_ENTRY_COUNT += 1
 
@@ -295,7 +299,7 @@ logging.info("Populate 14-day Google Sheet")
 
 wks_14.clear()
 
-wks_14.update("A1:J1", [header_names])
+wks_14.update("A1:K1", [header_names])
 
 for entry in cve_entries:
     last_updated = entry["lastUpdated"]
@@ -304,6 +308,8 @@ for entry in cve_entries:
         G_UPDATED_ENTRIES_14 += 1
         advisory_id = entry["advisoryId"]
         advisory_title = entry["advisoryTitle"]
+        cves_lst = entry["cves"]
+        cves = ", ".join(cves_lst)
         cve_score = entry["cvssBaseScore"]
         criticality = entry["sir"]
         psirt_version = entry["version"]
@@ -314,6 +320,7 @@ for entry in cve_entries:
         row = [
             advisory_id,
             advisory_title,
+            cves,
             cve_score,
             criticality,
             psirt_version,
@@ -323,7 +330,7 @@ for entry in cve_entries:
             product_names,
             pub_url,
         ]
-        gsheet_row = f"A{G_UPDATED_ENTRIES_14}:J{G_UPDATED_ENTRIES_14}"
+        gsheet_row = f"A{G_UPDATED_ENTRIES_14}:K{G_UPDATED_ENTRIES_14}"
         wks_14.update(gsheet_row, [row])
 
 # Update 30-day Google Sheet
@@ -331,7 +338,7 @@ logging.info("Populate 14-day Google Sheet")
 
 wks_30.clear()
 
-wks_30.update("A1:J1", [header_names])
+wks_30.update("A1:K1", [header_names])
 
 for entry in cve_entries:
     last_updated = entry["lastUpdated"]
@@ -340,6 +347,8 @@ for entry in cve_entries:
         G_UPDATED_ENTRIES_30 += 1
         advisory_id = entry["advisoryId"]
         advisory_title = entry["advisoryTitle"]
+        cves_lst = entry["cves"]
+        cves = ", ".join(cves_lst)
         cve_score = entry["cvssBaseScore"]
         criticality = entry["sir"]
         psirt_version = entry["version"]
@@ -350,6 +359,7 @@ for entry in cve_entries:
         row = [
             advisory_id,
             advisory_title,
+            cves,
             cve_score,
             criticality,
             psirt_version,
@@ -359,7 +369,7 @@ for entry in cve_entries:
             product_names,
             pub_url,
         ]
-        gsheet_row = f"A{G_UPDATED_ENTRIES_30}:J{G_UPDATED_ENTRIES_30}"
+        gsheet_row = f"A{G_UPDATED_ENTRIES_30}:K{G_UPDATED_ENTRIES_30}"
         wks_30.update(gsheet_row, [row])
 
 TTL_CNT = G_ENTRY_COUNT - 1
