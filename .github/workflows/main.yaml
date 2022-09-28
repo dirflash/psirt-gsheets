@@ -1,4 +1,4 @@
-name: pipedream-dispatch
+name: psirt-gsheet-dispatch
 
 # Controls when the action will run. Triggers the workflow on push request, or repository dispatch
 on:
