@@ -1,6 +1,7 @@
 import os
 import configparser
 import logging
+import logging.handlers as handlers
 import sys
 import json
 import csv
@@ -9,14 +10,19 @@ from time import time
 import gspread
 import requests
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(r".\logs\debug.log"),
-        logging.StreamHandler(sys.stdout),
-    ],
+logger = logging.getLogger("botsheet")
+logger.setLevel(logging.DEBUG)
+logHandler = handlers.RotatingFileHandler(
+    r".\logs\debug.log", maxBytes=5600, backupCount=2
 )
+logHandler.setLevel(logging.DEBUG)
+logFormatter = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
+)
+stdHandler = logging.StreamHandler(sys.stdout)
+logHandler.setFormatter(logFormatter)
+stdHandler.setFormatter(logFormatter)
+logger.addHandler(stdHandler)
 
 KEY = "CI"
 environ = os.getenv(KEY, default="LOCAL")
@@ -33,8 +39,14 @@ else:
     psirt_client_id = config["PSIRT"]["client_id"]
     psirt_client_secret = config["PSIRT"]["client_secret"]
     sa = gspread.service_account()
+    logger.addHandler(logHandler)
 
-sh = sa.open("PSIRTs")
+logger.info("Trying to open PSIRTs Google Sheet")
+try:
+    sh = sa.open("PSIRTs")
+except gspread.exceptions.APIError(response) as e:
+    print(type(e))
+    print(e)
 wks = sh.worksheet("Last7")
 
 sh_14 = sa.open("PSIRT-14")
@@ -151,7 +163,7 @@ otoken_token, otoken_type, otoken_expiry = psirt_otoken(
     psirt_grant, psirt_client_id, psirt_client_secret
 )
 
-logging.info("------------------------------------------------------")
+logger.info("------------------------------------------------------")
 
 # Begin of PSIRT request
 
@@ -175,11 +187,11 @@ try:
 except requests.HTTPError:
     status = psirt_response.status_code
     if status in (401, 403):
-        logging.error("Invalid PSIRT API key.")
+        logger.error("Invalid PSIRT API key.")
     elif status == 404:
-        logging.error("Invalid PSIRT request input.")
+        logger.error("Invalid PSIRT request input.")
     elif status in (429, 443):
-        logging.error("PSIRT API calls per minute exceeded.")
+        logger.error("PSIRT API calls per minute exceeded.")
     sys.exit(1)
 
 psirt_json_response = json.loads(psirt_response.text)
@@ -255,7 +267,7 @@ if environ == "LOCAL":
 
 # Update 7-day Google Sheet
 
-logging.info("Populate 7-day Google Sheet")
+logger.info("Populate 7-day Google Sheet")
 
 wks.clear()
 
@@ -295,7 +307,7 @@ for entry in cve_entries:
     G_ENTRY_COUNT += 1
 
 # Update 14-day Google Sheet
-logging.info("Populate 14-day Google Sheet")
+logger.info("Populate 14-day Google Sheet")
 
 wks_14.clear()
 
@@ -334,7 +346,7 @@ for entry in cve_entries:
         wks_14.update(gsheet_row, [row])
 
 # Update 30-day Google Sheet
-logging.info("Populate 14-day Google Sheet")
+logger.info("Populate 30-day Google Sheet")
 
 wks_30.clear()
 
@@ -377,10 +389,10 @@ SVN_CNT = G_UPDATED_ENTRIES_7 - 1
 FTN_CNT = G_UPDATED_ENTRIES_14 - 1
 TTY_CNT = G_UPDATED_ENTRIES_30 - 1
 
-logging.info("Total number of CVE entries: %s", TTL_CNT)
-logging.info("Number of updated CVE entries in last 7-days: %s", SVN_CNT)
-logging.info("Number of updated CVE entries in last 14-days: %s", FTN_CNT)
-logging.info("Number of updated CVE entries in last 30-days: %s", TTY_CNT)
+logger.info("Total number of CVE entries: %s", TTL_CNT)
+logger.info("Number of updated CVE entries in last 7-days: %s", SVN_CNT)
+logger.info("Number of updated CVE entries in last 14-days: %s", FTN_CNT)
+logger.info("Number of updated CVE entries in last 30-days: %s", TTY_CNT)
 
 if SVN_CNT == 0:
     wks.update("A2", "No updated CVEs in this time-frame")
