@@ -30,7 +30,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r github-requirements.txt; fi
       - name: service_account.json
         id: service_account
-        uses: jsdaniell/create-json@1.1.2
+        uses: jsdaniell/create-json@v1.2.1
         with:
           name: "service_account.json"
           json: ${{ secrets.GSHEETS_SECRET}}
