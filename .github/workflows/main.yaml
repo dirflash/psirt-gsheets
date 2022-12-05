@@ -28,7 +28,7 @@ jobs:
           pip install --upgrade requests
           pip install --upgrade gspread
           pip install -r github-requirements.txt
-          if [ -f requirements.txt ]; then pip install -r github-requirements.txt; fi
+          if [ -f github-requirements.txt ]; then pip install -r github-requirements.txt; fi
       - name: service_account.json
         id: service_account
         uses: jsdaniell/create-json@v1.2.1
