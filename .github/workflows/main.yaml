@@ -11,7 +11,7 @@ jobs:
   build:
     name: Run botsheet.py
     if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     environment: psirt_gsheets
     steps:
       - name: checkout repo content
