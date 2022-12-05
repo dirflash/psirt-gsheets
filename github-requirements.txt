@@ -12,7 +12,7 @@
 # google-auth-httplib2=>0.1.0
 # google-auth-oauthlib=>0.7.1
 # googleapis-common-protos=>1.57.0
-gspread=>5.7.2
+# gspread=>5.7.2
 httplib2=>0.21.0
 # idna=>3.4
 # isort=>5.10.1
