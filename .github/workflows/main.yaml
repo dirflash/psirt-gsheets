@@ -24,7 +24,7 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          # python -m pip install --upgrade pip
           pip install --upgrade requests
           pip install --upgrade gspread
           pip install -r github-requirements.txt
